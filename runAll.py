@@ -27,7 +27,7 @@ from science_direct import scienceDirectSearch
 # ---------------------------------------------------------------------------
 
 search_terms = 'fibrinolysis'
-numRes = 100;
+numRes = 10;
 saveDir = 'testResults'
 
 # ---------------------------------------------------------------------------
@@ -48,13 +48,22 @@ if not os.path.exists(saveDir):
 # ---------------------------------------------------------------------------
 
 print('Retrieving results from Science Direct')
-scienceDriectResults = scienceDirectSearch(search_terms,numRes,APIKEY,saveDir);
+scienceDirectResults = scienceDirectSearch(search_terms,numRes,APIKEY,saveDir);
+
+SDtitles = scienceDirectResults[0];
+SDabstract = scienceDirectResults[5];
 
 print('Retrieving results from PubMed')
 pubmedResults        = pubmedSearch(search_terms,numRes, saveDir);
 
+PMtitles = pubmedResults[0];
+PMabstract = pubmedResults[3];
+
 print('Retrieving results from Google Scholar')
 scholarResults       = googleScholarSearch(search_terms,numRes,saveDir);
+
+scholartitles = scholarResults[0];
+scholarabstract = scholarResults[3];
 
 # ---------------------------------------------------------------------------
 # POST-PROCESSING
