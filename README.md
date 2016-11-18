@@ -1,6 +1,10 @@
 # LiteratureReviewTools
 Python tools used to extract publication information from the web and performing data analysis. 
 
+PREREQUISITES
+Anaconda with Python 3.X
+pip install untangle
+
 TOOLS FOR EXTRACTING PUBLICATION INFORMATION
 
 1) Science Direct; limited to 200 results per query request. Need an API key to access the database. This can be found by registering at
