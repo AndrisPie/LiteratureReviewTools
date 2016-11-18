@@ -17,9 +17,12 @@ import os
 import sys
 import re
 import math
-from helpTool import printToCSV
 
 sys.path.append('toolbox')
+
+from helpTool import printToCSV
+
+
 
 try:
     # Try importing for Python 3
@@ -1030,7 +1033,7 @@ def googleScholarSearch(searchTerms,numRes,saveDir):
             
             
     # Saving to CSV file
-    printToCSV(saveDir + '/' + searchTerms +'.csv',['Title','Year','URL','Excerpt','Citations'],
+    printToCSV(saveDir + '/scholar_' + searchTerms +'.csv',['Title','Year','URL','Excerpt','Citations'],
                title,year,URL,abstract,num_citations)
 
 

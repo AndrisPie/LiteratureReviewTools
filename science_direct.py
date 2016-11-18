@@ -13,9 +13,9 @@ import requests
 import json
 from helpTool import printToCSV
 
-sys.path('toolbox');
+sys.path.append('toolbox');
 
-def scienceDirectSearch(search_terms,numRes,APIKEY):
+def scienceDirectSearch(search_terms,numRes,APIKEY, saveDir):
     
     # ----------------------------------------------------------------------------
     # INPUTS
@@ -86,7 +86,7 @@ def scienceDirectSearch(search_terms,numRes,APIKEY):
     # SAVING RESULTS
     # ----------------------------------------------------------------------------
     
-    printToCSV('science_direct'+search_terms+'.csv',['title','authors','date','link','eid','abstract'],
+    printToCSV(saveDir + '/science_direct_'+search_terms+'.csv',['title','authors','date','link','eid','abstract'],
                title,authors,date,link,eid,abstract)
                
     return title,authors,date,link,eid,abstract

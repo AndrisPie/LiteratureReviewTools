@@ -128,7 +128,7 @@ def pubmedSearch(search_terms,numRes, saveDir):
     # SAVING RESULTS
     # ----------------------------------------------------------------------------
         
-    printToCSV(saveDir+'Pubmed_'+search_terms+'.csv',['title','authors','date','abstract'],
+    printToCSV(saveDir+'/Pubmed_'+search_terms+'.csv',['title','authors','date','abstract'],
                titleStore,authorsStore,dateStore,abstractStore)
                
                
