@@ -8,92 +8,98 @@ Created on Tue Nov  8 17:03:24 2016
 # ----------------------------------------------------------------------------
 # HEADERS
 # ----------------------------------------------------------------------------
-
+import sys
 import requests
 import json
 from helpTool import printToCSV
 
-# ----------------------------------------------------------------------------
-# INPUTS
-# ----------------------------------------------------------------------------
+sys.path('toolbox');
 
-MY_API_KEY = '90f27a834604bb6313c5b3d68811a379';
-count = 200; # results returned
-search_terms_list = ['title(fibrinolysis)','tak(clot lysis)','thrombolysis+mathematical','fibrinolysis+modeling'];
-
-#Other useful search macros
-# abs() for abstract
-# tak() for abstract, title and keywords
-# authors()
-
-for search_terms in search_terms_list:
-
-    print('Running through ' + search_terms)
-
-# ----------------------------------------------------------------------------
-# ARTICLE SEARCH/ABSTRACT RETRIEVAL
-# ----------------------------------------------------------------------------
-
-    # API inputs
-    search_url = 'http://api.elsevier.com/content/search/scidir?count='+ str(count) + '&query=' + search_terms;
-    headers = {'Accept':'application/json', 'X-ELS-APIKey': MY_API_KEY}
+def scienceDirectSearch(searchList,numRes,APIKEY):
     
-    # API request
-    page_request = requests.get(search_url, headers=headers)
-    print(page_request.status_code)
+    # ----------------------------------------------------------------------------
+    # INPUTS
+    # ----------------------------------------------------------------------------
     
-    # Unpack json
-    page = json.loads(page_request.content.decode("utf-8"))
-    store = page['search-results']['entry'];
+    MY_API_KEY = APIKEY;
+    count = numRes; # results returned
+    search_terms_list = searchList;
     
-    # Cycle through each paper, retrieve information
-    it = -1;
-    title = []; authors = []; date = []; link = []; eid = []; abstract = [];
-    for paper in store:
+    #Other useful search macros
+    # abs() for abstract
+    # tak() for abstract, title and keywords
+    # authors()
+    
+    for search_terms in search_terms_list:
+    
+        print('Running through ' + search_terms)
+    
+    # ----------------------------------------------------------------------------
+    # ARTICLE SEARCH/ABSTRACT RETRIEVAL
+    # ----------------------------------------------------------------------------
+    
+        # API inputs
+        search_url = 'http://api.elsevier.com/content/search/scidir?count='+ str(count) + '&query=' + search_terms;
+        headers = {'Accept':'application/json', 'X-ELS-APIKey': MY_API_KEY}
         
-        try: 
+        # API request
+        page_request = requests.get(search_url, headers=headers)
+        print(page_request.status_code)
+        
+        # Unpack json
+        page = json.loads(page_request.content.decode("utf-8"))
+        store = page['search-results']['entry'];
+        
+        # Cycle through each paper, retrieve information
+        it = -1;
+        title = []; authors = []; date = []; link = []; eid = []; abstract = [];
+        for paper in store:
             
-            it += 1;
-            titleCur   = paper['dc:title'];
-            authorsCur = paper['authors'];
-            dateCur    = paper['prism:coverDisplayDate']
-            linkCur    = paper['link'][0]['@href'];
-            eidCur     = paper['eid']
-                    
-            title.append(titleCur)
-            authors.append(authorsCur)
-            date.append(dateCur)
-            link.append(linkCur)
-            eid.append(eidCur) 
-            
-            # Retrieve abstract
-            abstract_request = requests.get(linkCur, headers=headers);
-            abstractjson = json.loads(abstract_request.content.decode("utf-8"))
-            
-            try:            
-                abstract.append(abstractjson['full-text-retrieval-response']['coredata']['dc:description'])
-            
+            try: 
+                
+                it += 1;
+                titleCur   = paper['dc:title'];
+                authorsCur = paper['authors'];
+                dateCur    = paper['prism:coverDisplayDate']
+                linkCur    = paper['link'][0]['@href'];
+                eidCur     = paper['eid']
+                        
+                title.append(titleCur)
+                authors.append(authorsCur)
+                date.append(dateCur)
+                link.append(linkCur)
+                eid.append(eidCur) 
+                
+                # Retrieve abstract
+                abstract_request = requests.get(linkCur, headers=headers);
+                abstractjson = json.loads(abstract_request.content.decode("utf-8"))
+                
+                try:            
+                    abstract.append(abstractjson['full-text-retrieval-response']['coredata']['dc:description'])
+                
+                except:
+                    abstract.append('N/A');
+                 
             except:
-                abstract.append('N/A');
-             
-        except:
-            
-            # Specify where it failed
-            print('Failed at paper # ' + str(it))
-            
-            continue;
-            
-    # ----------------------------------------------------------------------------
-    # SAVING RESULTS
-    # ----------------------------------------------------------------------------
+                
+                # Specify where it failed
+                print('Failed at paper # ' + str(it))
+                
+                continue;
+                
+        # ----------------------------------------------------------------------------
+        # SAVING RESULTS
+        # ----------------------------------------------------------------------------
+        
+        printToCSV('science_direct'+search_terms+'.csv',['title','authors','date','link','eid','abstract'],
+                   title,authors,date,link,eid,abstract)
+                   
+        return title,authors,date,link,eid,abstract
+                   
+                   
+                   
+                   
+                   
     
-    printToCSV('science_direct'+search_terms+'.csv',['title','authors','date','link','eid','abstract'],
-               title,authors,date,link,eid,abstract)
-               
-               
-               
-               
-               
-
-
-
+    
+    
