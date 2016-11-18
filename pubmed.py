@@ -2,7 +2,17 @@
 """
 Created on Tue Nov  8 17:03:24 2016
 
-@author: ap4409
+@author: Andris Piebalgs
+
+INPUTS
+    - search_terms
+    - numRes: number of results to be returned
+    - saveDir: name of folder to save CSV files
+
+OUTPUTS
+    - title,authors,date,abstract
+    - saved csv file under the name 'saveDir/Pubmed_($search_terms)'
+
 """
 
 # ----------------------------------------------------------------------------
@@ -14,117 +24,120 @@ import json
 from helpTool import printToCSV
 import untangle
 
-# ----------------------------------------------------------------------------
-# INPUTS
-# ----------------------------------------------------------------------------
 
-count = 900;
-search_terms = 'fibrinolysis'
-
-# Finding ID codes
-search_url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retmax='+str(count)+'&sort=relevance&term='+search_terms;
-page_request = requests.get(search_url);
-
-print(page_request.status_code)
-
-page = json.loads(page_request.content.decode("utf-8"));
-idList = page["esearchresult"]["idlist"]
-
-# Retrieving information for each id code
-fetch_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id='+','.join(idList);
-
-fetch_request = requests.get(fetch_url);
-print(fetch_request.status_code)
-
-obj = untangle.parse(fetch_url)
-
-titleStore      = [];
-authorsStore    = [];
-abstractStore   = [];
-IDStore         = [];
-dateStore       = [];
-
-try:
-    L1 = len(obj.PubmedArticleSet.PubmedArticle);
+def pubmedSearch(search_terms,numRes, saveDir):
     
-except:
-    L1 = 1;
-
-
-for it in range(L1):
-
-    # Retrieve Article    
-    article = obj.PubmedArticleSet.PubmedArticle[it].MedlineCitation.Article
+    # ----------------------------------------------------------------------------
+    # INPUTS
+    # ----------------------------------------------------------------------------
     
-    # Retrieve Title    
-    title = article.ArticleTitle.cdata;
-    titleStore.append(title);
+    count = numRes;
     
-    # Retrieve Abstract
+    # Finding ID codes
+    search_url = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retmax='+str(count)+'&sort=relevance&term='+search_terms;
+    page_request = requests.get(search_url);
+    
+    print(page_request.status_code)
+    
+    page = json.loads(page_request.content.decode("utf-8"));
+    idList = page["esearchresult"]["idlist"]
+    
+    # Retrieving information for each id code
+    fetch_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id='+','.join(idList);
+    
+    fetch_request = requests.get(fetch_url);
+    print(fetch_request.status_code)
+    
+    obj = untangle.parse(fetch_url)
+    
+    titleStore      = [];
+    authorsStore    = [];
+    abstractStore   = [];
+    IDStore         = [];
+    dateStore       = [];
+    
     try:
-        abstract = article.Abstract.AbstractText;
-        text = [];
-    
-        try:    
-            for inner in range(len(abstract)-1):
-                text.append(abstract[inner].cdata);
-                
-        except:
-            text = [abstract.cdata];
+        L1 = len(obj.PubmedArticleSet.PubmedArticle);
         
-        abstractStore.append(text);
-    
     except:
+        L1 = 1;
+    
+    
+    for it in range(L1):
+    
+        # Retrieve Article    
+        article = obj.PubmedArticleSet.PubmedArticle[it].MedlineCitation.Article
         
-        abstractStore.append('N/A')
-    
-    # Retrieve Date
-
-    date = article.Journal.JournalIssue.PubDate
-    try:
-        dateStore.append([date.Year.cdata])
-    
-    except:
-        dateStore.append('Error Retrieving')
-    
-    
-    # Retrieve Authors
-    
-    try:
-
-        authorList = article.AuthorList;
-        emptyList = [];
-
+        # Retrieve Title    
+        title = article.ArticleTitle.cdata;
+        titleStore.append(title);
+        
+        # Retrieve Abstract
         try:
-            for loop in range(len(authorList.Author)):
-                emptyList.append([authorList.Author[loop].LastName.cdata,authorList.Author[loop].ForeName.cdata])
+            abstract = article.Abstract.AbstractText;
+            text = [];
+        
+            try:    
+                for inner in range(len(abstract)-1):
+                    text.append(abstract[inner].cdata);
+                    
+            except:
+                text = [abstract.cdata];
+            
+            abstractStore.append(text);
+        
+        except:
+            
+            abstractStore.append('N/A')
+        
+        # Retrieve Date
+    
+        date = article.Journal.JournalIssue.PubDate
+        try:
+            dateStore.append([date.Year.cdata])
+        
+        except:
+            dateStore.append('Error Retrieving')
+        
+        
+        # Retrieve Authors
+        
+        try:
+    
+            authorList = article.AuthorList;
+            emptyList = [];
+    
+            try:
+                for loop in range(len(authorList.Author)):
+                    emptyList.append([authorList.Author[loop].LastName.cdata,authorList.Author[loop].ForeName.cdata])
+                
+            except:
+                emptyList = [authorList.Author.LastName.cdata,authorList.Author.ForeName.cdata];
+                
+            authorsStore.append(emptyList);
             
         except:
-            emptyList = [authorList.Author.LastName.cdata,authorList.Author.ForeName.cdata];
-            
-        authorsStore.append(emptyList);
+            authorsStore.append('Error Retrieving')
         
-    except:
-        authorsStore.append('Error Retrieving')
+        # Retrieve Article ID List
     
+        articleIDList = obj.PubmedArticleSet.PubmedArticle[it].PubmedData.ArticleIdList
+        IDStore.append(articleIDList)
+    
+    # ----------------------------------------------------------------------------
+    # SAVING RESULTS
+    # ----------------------------------------------------------------------------
         
+    printToCSV(saveDir+'Pubmed_'+search_terms+'.csv',['title','authors','date','abstract'],
+               titleStore,authorsStore,dateStore,abstractStore)
+               
+               
+    return titleStore,authorsStore,dateStore,abstractStore
+                   
+                   
+                   
+                   
     
-    # Retrieve Article ID List
-
-    articleIDList = obj.PubmedArticleSet.PubmedArticle[it].PubmedData.ArticleIdList
-    IDStore.append(articleIDList)
-
-# ----------------------------------------------------------------------------
-# SAVING RESULTS
-# ----------------------------------------------------------------------------
     
-printToCSV('Pubmed_'+search_terms+'.csv',['title','authors','date','abstract'],
-           titleStore,authorsStore,dateStore,abstractStore)
-               
-               
-               
-               
-
-
-
-
+    
+    

@@ -2,7 +2,7 @@
 """
 Created on Tue Nov  8 17:03:24 2016
 
-@author: ap4409
+@author: Andris Piebalgs
 """
 
 # ----------------------------------------------------------------------------
@@ -15,7 +15,7 @@ from helpTool import printToCSV
 
 sys.path('toolbox');
 
-def scienceDirectSearch(searchList,numRes,APIKEY):
+def scienceDirectSearch(search_terms,numRes,APIKEY):
     
     # ----------------------------------------------------------------------------
     # INPUTS
@@ -23,81 +23,76 @@ def scienceDirectSearch(searchList,numRes,APIKEY):
     
     MY_API_KEY = APIKEY;
     count = numRes; # results returned
-    search_terms_list = searchList;
     
     #Other useful search macros
     # abs() for abstract
     # tak() for abstract, title and keywords
     # authors()
     
-    for search_terms in search_terms_list:
-    
-        print('Running through ' + search_terms)
-    
     # ----------------------------------------------------------------------------
     # ARTICLE SEARCH/ABSTRACT RETRIEVAL
     # ----------------------------------------------------------------------------
+
+    # API inputs
+    search_url = 'http://api.elsevier.com/content/search/scidir?count='+ str(count) + '&query=' + search_terms;
+    headers = {'Accept':'application/json', 'X-ELS-APIKey': MY_API_KEY}
     
-        # API inputs
-        search_url = 'http://api.elsevier.com/content/search/scidir?count='+ str(count) + '&query=' + search_terms;
-        headers = {'Accept':'application/json', 'X-ELS-APIKey': MY_API_KEY}
+    # API request
+    page_request = requests.get(search_url, headers=headers)
+    print(page_request.status_code)
+    
+    # Unpack json
+    page = json.loads(page_request.content.decode("utf-8"))
+    store = page['search-results']['entry'];
+    
+    # Cycle through each paper, retrieve information
+    it = -1;
+    title = []; authors = []; date = []; link = []; eid = []; abstract = [];
+    for paper in store:
         
-        # API request
-        page_request = requests.get(search_url, headers=headers)
-        print(page_request.status_code)
-        
-        # Unpack json
-        page = json.loads(page_request.content.decode("utf-8"))
-        store = page['search-results']['entry'];
-        
-        # Cycle through each paper, retrieve information
-        it = -1;
-        title = []; authors = []; date = []; link = []; eid = []; abstract = [];
-        for paper in store:
+        try: 
             
-            try: 
-                
-                it += 1;
-                titleCur   = paper['dc:title'];
-                authorsCur = paper['authors'];
-                dateCur    = paper['prism:coverDisplayDate']
-                linkCur    = paper['link'][0]['@href'];
-                eidCur     = paper['eid']
-                        
-                title.append(titleCur)
-                authors.append(authorsCur)
-                date.append(dateCur)
-                link.append(linkCur)
-                eid.append(eidCur) 
-                
-                # Retrieve abstract
-                abstract_request = requests.get(linkCur, headers=headers);
-                abstractjson = json.loads(abstract_request.content.decode("utf-8"))
-                
-                try:            
-                    abstract.append(abstractjson['full-text-retrieval-response']['coredata']['dc:description'])
-                
-                except:
-                    abstract.append('N/A');
-                 
+            it += 1;
+            titleCur   = paper['dc:title'];
+            authorsCur = paper['authors'];
+            dateCur    = paper['prism:coverDisplayDate']
+            linkCur    = paper['link'][0]['@href'];
+            eidCur     = paper['eid']
+                    
+            title.append(titleCur)
+            authors.append(authorsCur)
+            date.append(dateCur)
+            link.append(linkCur)
+            eid.append(eidCur) 
+            
+            # Retrieve abstract
+            abstract_request = requests.get(linkCur, headers=headers);
+            abstractjson = json.loads(abstract_request.content.decode("utf-8"))
+            
+            try:            
+                abstract.append(abstractjson['full-text-retrieval-response']['coredata']['dc:description'])
+            
             except:
-                
-                # Specify where it failed
-                print('Failed at paper # ' + str(it))
-                
-                continue;
-                
-        # ----------------------------------------------------------------------------
-        # SAVING RESULTS
-        # ----------------------------------------------------------------------------
-        
-        printToCSV('science_direct'+search_terms+'.csv',['title','authors','date','link','eid','abstract'],
-                   title,authors,date,link,eid,abstract)
-                   
-        return title,authors,date,link,eid,abstract
-                   
-                   
-                   
+                abstract.append('N/A');
+             
+        except:
+            
+            # Specify where it failed
+            print('Failed at paper # ' + str(it))
+            
+            continue;
+            
+    # ----------------------------------------------------------------------------
+    # SAVING RESULTS
+    # ----------------------------------------------------------------------------
+    
+    printToCSV('science_direct'+search_terms+'.csv',['title','authors','date','link','eid','abstract'],
+               title,authors,date,link,eid,abstract)
+               
+    return title,authors,date,link,eid,abstract
+               
+               
+               
                    
                    
     
