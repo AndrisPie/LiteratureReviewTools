@@ -6,11 +6,12 @@ Created on Fri Nov 18 11:30:46 2016
 
 Extract research articles from multiple sources
 
-Science Direct: Max, 200
+Science Direct: Max, 200, need API key
 PubMed : Max, 1000
 Google Scholar: No max
 
 Saves results to CSVs and stores results in RAM
+
 
 """
 
@@ -20,7 +21,6 @@ import configparser
 from googleScholar import googleScholarSearch
 from pubmed import pubmedSearch
 from science_direct import scienceDirectSearch
-
 
 # ---------------------------------------------------------------------------
 # INPUTS
