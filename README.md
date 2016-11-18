@@ -19,11 +19,11 @@ All results are saved in a csv file under the name of the query keywords.
 
 DEVELOPMENT
 
-1) Try to retrieve results from Web of Science database. Should be possible by using BeautifulSoup
+1) Try to retrieve results from Web of Science database. Should be possible by using BeautifulSoup (Weekend)
 
 2) Unsupervised learning algorithm to classify each research article in a cluster. Possible options for classification include:
 
   - Topic modelling algorithms such as LDA (Latent Dirichlet Analysis) or LSA (Latent Semantic Analysis)
-  - Gensim Doc2Vec algorithm to represent each document as a set of vectors. Then maybe run clustering algorithm on it. 
+  - Gensim Doc2Vec algorithm to represent each document as a set of vectors. Then maybe run clustering algorithm on it. Visualise with pyLDAVis. 
   
 Interested in contributing? Email me at andris.piebalgs14@outlook.com
