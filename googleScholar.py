@@ -1009,7 +1009,11 @@ def googleScholarSearch(searchTerms,numRes,saveDir):
     query.set_num_page_results(numRes)
     
     # Creating storage
-    title = year = URL = abstract = num_citations = [];
+    title = [];
+	year = [];
+	URL = [];
+	abstract = [];
+	num_citations = [];
 
     # Looping through multiple pages if desired results are greater than 20
     numLoops = math.ceil(numRes/20);    
