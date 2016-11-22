@@ -80,11 +80,12 @@ def pubmedSearch(search_terms,numRes, saveDir):
             try:    
                 for inner in range(len(abstract)-1):
                     text.append(abstract[inner].cdata);
-                    
+                   
+                abstractStore.append(' '.join(text))                   
+                   
             except:
-                text = [abstract.cdata];
-            
-            abstractStore.append(text);
+                text = abstract.cdata;
+                abstractStore.append(text);
         
         except:
             
@@ -94,7 +95,7 @@ def pubmedSearch(search_terms,numRes, saveDir):
     
         date = article.Journal.JournalIssue.PubDate
         try:
-            dateStore.append([date.Year.cdata])
+            dateStore.append(date.Year.cdata)
         
         except:
             dateStore.append('Error Retrieving')
@@ -109,11 +110,11 @@ def pubmedSearch(search_terms,numRes, saveDir):
     
             try:
                 for loop in range(len(authorList.Author)):
-                    emptyList.append([authorList.Author[loop].LastName.cdata,authorList.Author[loop].ForeName.cdata])
+                    emptyList.append(authorList.Author[loop].LastName.cdata + ', '+authorList.Author[loop].ForeName.cdata)
                 
             except:
                 emptyList = [authorList.Author.LastName.cdata,authorList.Author.ForeName.cdata];
-                
+
             authorsStore.append(emptyList);
             
         except:
@@ -128,11 +129,11 @@ def pubmedSearch(search_terms,numRes, saveDir):
     # SAVING RESULTS
     # ----------------------------------------------------------------------------
         
-    printToCSV(saveDir+'/Pubmed_'+search_terms+'.csv',['title','authors','date','abstract'],
-               titleStore,authorsStore,dateStore,abstractStore)
+    printToCSV(saveDir+'/Pubmed_'+search_terms+'.csv',['Title','Abstract','Date','Authors'],
+               titleStore,abstractStore,dateStore,authorsStore)
                
                
-    return titleStore,authorsStore,dateStore,abstractStore
+    return titleStore, abstractStore, authorsStore, dateStore
                    
                    
                    

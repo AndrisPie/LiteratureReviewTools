@@ -86,10 +86,10 @@ def scienceDirectSearch(search_terms,numRes,APIKEY, saveDir):
     # SAVING RESULTS
     # ----------------------------------------------------------------------------
     
-    printToCSV(saveDir + '/science_direct_'+search_terms+'.csv',['title','authors','date','link','eid','abstract'],
-               title,authors,date,link,eid,abstract)
+    printToCSV(saveDir + '/science_direct_'+search_terms+'.csv',['title','abstract','date','authors','link','eid'],
+               title, abstract,date,authors,link,eid)
                
-    return title,authors,date,link,eid,abstract
+    return title, abstract,date,authors,link,eid
                
                
                

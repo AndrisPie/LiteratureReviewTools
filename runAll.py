@@ -26,8 +26,8 @@ from science_direct import scienceDirectSearch
 # INPUTS
 # ---------------------------------------------------------------------------
 
-search_terms = 'fibrinolysis'
-numRes = 10;
+search_terms = 'clot lysis'
+numRes = 100;
 saveDir = 'testResults'
 
 # ---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ saveDir = 'testResults'
 
 # Where the API Key is stored
 config = configparser.ConfigParser();
-config.read('keys.ini')
+config.read('toolbox/keys.ini')
 APIKEY = config['Science Direct']['API Key']
 
 # Checking if file exists, creating one if not
@@ -51,19 +51,23 @@ print('Retrieving results from Science Direct')
 scienceDirectResults = scienceDirectSearch(search_terms,numRes,APIKEY,saveDir);
 
 SDtitles = scienceDirectResults[0];
-SDabstract = scienceDirectResults[5];
+SDabstract = scienceDirectResults[1];
 
 print('Retrieving results from PubMed')
 pubmedResults        = pubmedSearch(search_terms,numRes, saveDir);
 
 PMtitles = pubmedResults[0];
-PMabstract = pubmedResults[3];
+PMabstract = pubmedResults[1];
 
 print('Retrieving results from Google Scholar')
 scholarResults       = googleScholarSearch(search_terms,numRes,saveDir);
 
-scholartitles = scholarResults[0];
-scholarabstract = scholarResults[3];
+
+
+
+
+#scholartitles = scholarResults[0];
+#scholarabstract = scholarResults[1];
 
 # ---------------------------------------------------------------------------
 # POST-PROCESSING

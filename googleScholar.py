@@ -445,6 +445,15 @@ class ScholarArticleParser120726(ScholarArticleParser):
                 if tag.find('div', {'class': 'gs_a'}):
                     year = self.year_re.findall(tag.find('div', {'class': 'gs_a'}).text)
                     self.article['year'] = year[0] if len(year) > 0 else None
+                    
+                    # Added Code
+                    try:
+                        author = tag.find('div', {'class': 'gs_a'}).text
+                        self.article['author'] = author.split('-')[0];
+                        
+                    except:
+                        self.article['author'] = None;
+                    # Finished Code
 
                 if tag.find('div', {'class': 'gs_fl'}):
                     self._parse_links(tag.find('div', {'class': 'gs_fl'}))
@@ -1010,10 +1019,11 @@ def googleScholarSearch(searchTerms,numRes,saveDir):
     
     # Creating storage
     title = [];
-	year = [];
-	URL = [];
-	abstract = [];
-	num_citations = [];
+    year = [];
+    URL = [];
+    abstract = [];
+    num_citations = [];
+    authors = [];
 
     # Looping through multiple pages if desired results are greater than 20
     numLoops = math.ceil(numRes/20);    
@@ -1034,14 +1044,15 @@ def googleScholarSearch(searchTerms,numRes,saveDir):
             URL.append(art['url']);
             abstract.append(art['excerpt']);
             num_citations.append(art['num_citations']);
+            authors.append(art['author'])
             
             
     # Saving to CSV file
-    printToCSV(saveDir + '/scholar_' + searchTerms +'.csv',['Title','Year','URL','Excerpt','Citations'],
-               title,year,URL,abstract,num_citations)
+    printToCSV(saveDir + '/scholar_' + searchTerms +'.csv',['Title','Excerpt','Year','Authors','URL','Citations'],
+               title, abstract, year, authors, URL, num_citations)
 
 
     # Returning values
-    return title,year,URL,abstract,num_citations
-
+    #return title, abstract, year, authors, URL,num_citations
+    return articles
 
