@@ -11,15 +11,19 @@ Created on Mon Nov 21 11:14:39 2016
 
 import sys
 sys.path.append('toolbox')
-from helpTool import readCSV as read
 from nltkExtra import cleanText as clean
 import gensim 
+import pandas as pd
+from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
 # ---------------------------------------------------------------------------
 # INPUTS
 # ---------------------------------------------------------------------------
 
-fname = 'testResults/Pubmed_fibrinolysis.csv';
-N_ITER = 10;
+fname = 'testResults/bleh.csv';
+N_ITER = 40;
 NUM_TOPIC = 10;
 
 # ---------------------------------------------------------------------------
@@ -27,11 +31,16 @@ NUM_TOPIC = 10;
 # ---------------------------------------------------------------------------
 
 # Read and organising data
-data = read(fname);
-title = [term[1] for term in data[1:len(data)]];
+data = pd.read_csv(fname)
+
+title = [term[0] for term in data.values];
+abstract = [term[1] for term in data.values];
 
 # Cleaning text
-textCln = clean(title,'en');
+titleCln = clean(title,'en');
+abstractCln = clean(abstract,'en');
+
+textCln = titleCln;
 
 # Bag of words
 dictionary = gensim.corpora.Dictionary(textCln)
@@ -46,11 +55,80 @@ lda = gensim.models.LdaModel(corpus, num_topics=NUM_TOPIC, id2word = dictionary,
 topics = lda.show_topics(NUM_TOPIC)
 
 # Generate visualisation (only for Ipython notebook)
+#import pyLDAvis.gensim
+#vis_data = pyLDAvis.gensim.prepare(lda,corpus,dictionary)
+#pyLDAvis.save_html(vis_data,'LDA_VisualizationLitReview.html')
+
+# Return all document topics
+def get_doc_topics(lda, bow):
+    gamma, _ = lda.inference([bow])
+    topic_dist = gamma[0] / sum(gamma[0])  # normalize distribution
+    return [(topicid, topicvalue) for topicid, topicvalue in enumerate(topic_dist)]
+
+# Function that returns blueprint of each document
+def returnBlueprint(lda,corpus):
+    
+    blueprint_per_doc = [];
+    docID = 0;
+    
+    for text in corpus:
+
+        currentTopList = get_doc_topics(lda,text);
+        topArray = [];
+
+        for currentTop in currentTopList:        
+            
+            topID = currentTop[0];
+            score = currentTop[1];
+        
+            topArray.append(score);
+            
+        blueprint_per_doc.append(topArray);
+        docID += 1;
+        
+    return blueprint_per_doc;
+
+# Function for dimensionality reduction
+def dimensionalityReduction(blueprint):
+    
+    model = TSNE(n_components=2,random_state=0);
+    data = model.fit_transform(blueprint);
+    
+    X = [term[0] for term in data];
+    Y = [term[1] for term in data]
+    
+    return X,Y
+    
+# Function for clustering
+def cluster(data,N_GROUPS):
+    model = KMeans(n_clusters = N_GROUPS);
+    model.fit(data);
+    
+    return model.labels_
+
+# Function for determining similarity between 2 data sets
+# INSERT HERE JENSEN-SHANNON distance
+
+  
+# Return topic distribution for each document
+blueprint =  returnBlueprint(lda,corpus)
+
+# Return dimensionality reduction
+[X,Y] = dimensionalityReduction(blueprint)
+
+# Cluster the data
+labels = cluster(blueprint,2)
+
+# Plot results
+plt.scatter(X,Y,s=40,c=labels)
+plt.show()
+
 '''
-import pyLDAvis.gensim
-vis_data = pyLDAvis.gensim.prepare(lda,corpus,dictionary)
-pyLDAvis.save_html(vis_data,'LDA_VisualizationLitReview.html')
-'''
+
+# OTHER THINGS TO CONSIDER
+# Train LDA model
+# Use titles or abstracts?
+# Other algorithms for topic modelling?
 
 # Finding main topic for each document
 docID = 0;
@@ -81,3 +159,4 @@ for docID in topic_for_document.keys():
     else:
         classDocuments['Not Clear Topic'].append(title[docID])
 
+'''

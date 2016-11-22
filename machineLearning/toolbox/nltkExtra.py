@@ -8,28 +8,34 @@ NATURAL LANGUAGE PROCESSING TOOLKIT EXTRA
 
 from createTokens import preprocess
 from stop_words import get_stop_words
-from nltk.stem.porter import PorterStemmer
 
 def cleanText(text,lang):
     
     stop = get_stop_words(lang)
-    p_stemmer = PorterStemmer()
     
     textCln =[];
     
+    
     for tweet in text:
         
-        tokens = preprocess(tweet.lower());    
+        if type(tweet) == str:        
         
-        clnTweet = [];    
-        
-        for word in tokens:
+            tokens = preprocess(tweet.lower());    
             
-            if word not in stop and len(word) > 2 and not word.startswith('http'):
+            clnTweet = [];    
+            
+            for word in tokens:
                 
-                clnTweet.append((word));
-        
-        textCln.append(clnTweet)
+                if word not in stop and len(word) > 2 and not word.startswith('http'):
+                    
+                    clnTweet.append((word));
+            
+            textCln.append(clnTweet)
+            
+        else:
+            
+            textCln.append([])
+    
         
     return textCln
 
