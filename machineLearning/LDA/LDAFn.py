@@ -16,48 +16,56 @@ import gensim
 import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 
-# ---------------------------------------------------------------------------
-# INPUTS
-# ---------------------------------------------------------------------------
+def main():
+    
+    output = analyseText('testResults/bleh.csv',10,10);
+    
+    topics = output[0]; # List of main words per topic
+    blueprint = output[1]; # List of topics for each document (blueprint)
 
-fname = 'testResults/bleh.csv';
-N_ITER = 40;
-NUM_TOPIC = 10;
 
-# ---------------------------------------------------------------------------
-# SIMULATION ENGINE
-# ---------------------------------------------------------------------------
+def analyseText(fname,N_ITER,NUM_TOPIC):
+    
+    # Read and organising data
+    data = pd.read_csv(fname)
 
-# Read and organising data
-data = pd.read_csv(fname)
+    title = [term[0] for term in data.values];
+    abstract = [term[1] for term in data.values];
 
-title = [term[0] for term in data.values];
-abstract = [term[1] for term in data.values];
+    # Cleaning text
+    titleCln = clean(title,'en');
+    #abstractCln = clean(abstract,'en');
 
-# Cleaning text
-titleCln = clean(title,'en');
-abstractCln = clean(abstract,'en');
+    textCln = titleCln;
 
-textCln = titleCln;
+    # Bag of words
+    dictionary = gensim.corpora.Dictionary(textCln)
 
-# Bag of words
-dictionary = gensim.corpora.Dictionary(textCln)
+    # Convert tokenized documents into a document-term matrix (bag of words)
+    corpus = [dictionary.doc2bow(text) for text in textCln]
 
-# Convert tokenized documents into a document-term matrix (bag of words)
-corpus = [dictionary.doc2bow(text) for text in textCln]
+    # Generate LDA model
+    lda = gensim.models.LdaModel(corpus, num_topics=NUM_TOPIC, id2word = dictionary, passes=N_ITER)
 
-# Generate LDA model
-lda = gensim.models.LdaModel(corpus, num_topics=NUM_TOPIC, id2word = dictionary, passes=N_ITER)
-
-# Print topics
-topics = lda.show_topics(NUM_TOPIC)
-
+    # Print topics
+    topics = lda.show_topics(NUM_TOPIC);
+    
+    # Return topic distribution for each document
+    blueprint =  returnBlueprint(lda,corpus)
+    
+    return topics,blueprint
+    
+    
 # Generate visualisation (only for Ipython notebook)
-#import pyLDAvis.gensim
-#vis_data = pyLDAvis.gensim.prepare(lda,corpus,dictionary)
-#pyLDAvis.save_html(vis_data,'LDA_VisualizationLitReview.html')
+def generateLDAVis(lda,corpus,dictionary,htmlName):
+
+    import pyLDAvis.gensim;
+    import pyLDAvis;
+    
+    vis_data = pyLDAvis.gensim.prepare(lda,corpus,dictionary)
+    pyLDAvis.save_html(vis_data,htmlName)
+   
 
 # Return all document topics
 def get_doc_topics(lda, bow):
@@ -105,58 +113,43 @@ def cluster(data,N_GROUPS):
     model.fit(data);
     
     return model.labels_
+    
+# Function for finding main topic for each document
+def findMainTopic(corpus):
+    docID = 0;
+    topic_for_document = {};
+    for text in corpus:
+    
+        currentTopList = lda.get_document_topics(text);
+        topic_for_document[docID] = 'N/A'
+        
+        for currentTop in currentTopList:
+            topID = currentTop[0];
+            score = currentTop[1];
+            
+            if score > 0.8:
+                topic_for_document[docID] = topID
+        
+        docID += 1;
+        
+    return topic_for_document;
+    
+# Function for organising documents by topic
+def organiseDocuments(topic_for_document,title,NUM_TOPIC):
+    classDocuments = {k: [] for k in range(NUM_TOPIC)}
+    classDocuments['Not Clear Topic'] = [];
+    
+    for docID in topic_for_document.keys():
+        
+        if topic_for_document[docID] != 'N/A':
+            classDocuments[topic_for_document[docID]].append(title[docID]);
+            
+        else:
+            classDocuments['Not Clear Topic'].append(title[docID])
+            
+    return classDocuments;
+
 
 # Function for determining similarity between 2 data sets
 # INSERT HERE JENSEN-SHANNON distance
 
-  
-# Return topic distribution for each document
-blueprint =  returnBlueprint(lda,corpus)
-
-# Return dimensionality reduction
-[X,Y] = dimensionalityReduction(blueprint)
-
-# Cluster the data
-labels = cluster(blueprint,2)
-
-# Plot results
-plt.scatter(X,Y,s=40,c=labels)
-plt.show()
-
-'''
-
-# OTHER THINGS TO CONSIDER
-# Train LDA model
-# Use titles or abstracts?
-# Other algorithms for topic modelling?
-
-# Finding main topic for each document
-docID = 0;
-topic_for_document = {};
-for text in corpus:
-
-    currentTopList = lda.get_document_topics(text);
-    topic_for_document[docID] = 'N/A'
-    
-    for currentTop in currentTopList:
-        topID = currentTop[0];
-        score = currentTop[1];
-        
-        if score > 0.8:
-            topic_for_document[docID] = topID
-    
-    docID += 1;
-    
-# Organising documents by topic
-classDocuments = {k: [] for k in range(NUM_TOPIC)}
-classDocuments['Not Clear Topic'] = [];
-
-for docID in topic_for_document.keys():
-    
-    if topic_for_document[docID] != 'N/A':
-        classDocuments[topic_for_document[docID]].append(title[docID]);
-        
-    else:
-        classDocuments['Not Clear Topic'].append(title[docID])
-
-'''
