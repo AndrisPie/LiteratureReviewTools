@@ -26,7 +26,7 @@ from science_direct import scienceDirectSearch
 # INPUTS
 # ---------------------------------------------------------------------------
 
-search_terms = 'clot lysis'
+search_terms = 'middle cerebral artery M2 flowrate'
 numRes = 100;
 saveDir = 'testResults'
 
@@ -46,18 +46,21 @@ if not os.path.exists(saveDir):
 # ---------------------------------------------------------------------------
 # SIMULATION ENGINE
 # ---------------------------------------------------------------------------
-
+'''
 print('Retrieving results from Science Direct')
 scienceDirectResults = scienceDirectSearch(search_terms,numRes,APIKEY,saveDir);
 
 SDtitles = scienceDirectResults[0];
 SDabstract = scienceDirectResults[1];
 
+
 print('Retrieving results from PubMed')
 pubmedResults        = pubmedSearch(search_terms,numRes, saveDir);
 
 PMtitles = pubmedResults[0];
 PMabstract = pubmedResults[1];
+
+'''
 
 print('Retrieving results from Google Scholar')
 scholarResults       = googleScholarSearch(search_terms,numRes,saveDir);
