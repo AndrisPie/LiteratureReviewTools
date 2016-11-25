@@ -17,21 +17,8 @@ import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 
-def main():
-    
-    output = analyseText('testResults/bleh.csv',10,10);
-    
-    topics = output[0]; # List of main words per topic
-    blueprint = output[1]; # List of topics for each document (blueprint)
 
-
-def analyseText(fname,N_ITER,NUM_TOPIC):
-    
-    # Read and organising data
-    data = pd.read_csv(fname)
-
-    title = [term[0] for term in data.values];
-    abstract = [term[1] for term in data.values];
+def analyseText(title,N_ITER,NUM_TOPIC):
 
     # Cleaning text
     titleCln = clean(title,'en');
