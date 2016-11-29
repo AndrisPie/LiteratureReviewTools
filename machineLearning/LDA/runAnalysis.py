@@ -15,7 +15,7 @@ data = pd.read_csv('testResults/Pubmed_fibrinolysis.csv')
 title = [term[0] for term in data.values];
 abstract = [term[1] for term in data.values];
 
-output = analyseText(abstract,10,10);
+output = analyseText(abstract,10,10,0);
     
 topics = output[0]; # List of main words per topic
 blueprint = output[1]; # List of topics for each document (blueprint)

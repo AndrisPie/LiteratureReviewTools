@@ -18,7 +18,7 @@ from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 
 
-def analyseText(title,N_ITER,NUM_TOPIC):
+def analyseText(title,N_ITER,NUM_TOPIC,vis):
 
     # Cleaning text
     titleCln = clean(title,'en');
@@ -40,6 +40,11 @@ def analyseText(title,N_ITER,NUM_TOPIC):
     
     # Return topic distribution for each document
     blueprint =  returnBlueprint(lda,corpus)
+    
+    # If visualisation
+    
+    if vis == 1:
+        generateLDAVis(lda,corpus,dictionary,'savedHTMLLink.html')
     
     return topics,blueprint
     
