@@ -16,7 +16,10 @@ Saves results to CSVs and stores results in RAM
 """
 
 import os
+import sys
 import configparser
+
+sys.path.append('searchTools')
 
 from googleScholar import googleScholarSearch
 from pubmed import pubmedSearch
@@ -26,9 +29,9 @@ from science_direct import scienceDirectSearch
 # INPUTS
 # ---------------------------------------------------------------------------
 
-search_terms = 'middle cerebral artery M2 flowrate'
+search_terms = 'abdominal aortic aneurysm'
 numRes = 100;
-saveDir = 'testResults'
+saveDir = 'testResults2'
 
 # ---------------------------------------------------------------------------
 # CHECK
@@ -46,7 +49,7 @@ if not os.path.exists(saveDir):
 # ---------------------------------------------------------------------------
 # SIMULATION ENGINE
 # ---------------------------------------------------------------------------
-'''
+
 print('Retrieving results from Science Direct')
 scienceDirectResults = scienceDirectSearch(search_terms,numRes,APIKEY,saveDir);
 
@@ -60,21 +63,10 @@ pubmedResults        = pubmedSearch(search_terms,numRes, saveDir);
 PMtitles = pubmedResults[0];
 PMabstract = pubmedResults[1];
 
-'''
 
 print('Retrieving results from Google Scholar')
 scholarResults       = googleScholarSearch(search_terms,numRes,saveDir);
 
-
-
-
-
-#scholartitles = scholarResults[0];
-#scholarabstract = scholarResults[1];
-
-# ---------------------------------------------------------------------------
-# POST-PROCESSING
-# ---------------------------------------------------------------------------
 
 
 
